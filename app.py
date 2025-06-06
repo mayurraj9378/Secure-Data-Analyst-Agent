@@ -1,6 +1,5 @@
 import json
 import tempfile
-import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,10 +7,6 @@ import plotly.express as px
 from openai import OpenAI
 from groq import Groq
 import duckdb
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 # Configure Streamlit page
 st.set_page_config(
@@ -20,24 +15,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# --- Secure API Key Management ---
-def get_secret(key_name, input_label):
-    """Load API key from environment variables or session state"""
-    try:
-        # 1. Try environment variables
-        env_key = os.getenv(key_name)
-        if env_key:
-            return env_key
-        
-        # 2. Fallback to session state (from user input)
-        if key_name in st.session_state:
-            return st.session_state[key_name]
-        return None
-    
-    except Exception as e:
-        st.error(f"Error loading {key_name}: {str(e)}")
-        return None
 
 def preprocess_and_save(uploaded_file):
     """File processing with error handling"""
@@ -84,7 +61,7 @@ class DeepSeekAnalystAgent:
     def analyze_data(self, df: pd.DataFrame, query: str) -> str:
         """Enhanced analysis with error handling"""
         try:
-            response = self.client.chat.completions.create(
+            response =self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are an expert data analyst."},
@@ -103,15 +80,15 @@ def main():
     # --- Sidebar Configuration ---
     with st.sidebar:
         st.header("API Configuration")
-        st.info("Enter your API keys below or set them in a .env file.")
+        st.info("Enter your API keys below.")
         
         # Input fields for API keys
         groq_key_input = st.text_input("Groq API Key:", type="password", key="groq_key_input")
         deepseek_key_input = st.text_input("DeepSeek API Key:", type="password", key="deepseek_key_input")
         
-        # Load keys from env or input
-        groq_key = get_secret("GROQ_API_KEY", "Groq API Key:") or groq_key_input
-        deepseek_key = get_secret("DEEPSEEK_API_KEY", "DeepSeek API Key:") or deepseek_key_input
+        # Use the input directly
+        groq_key = groq_key_input
+        deepseek_key = deepseek_key_input
         
         if groq_key:
             st.session_state.GROQ_API_KEY = groq_key
@@ -196,4 +173,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
