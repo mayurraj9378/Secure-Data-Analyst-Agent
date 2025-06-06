@@ -1,3 +1,8 @@
- phidata
- streamlit 
- groq
+streamlit
+pandas
+numpy
+plotly
+openai
+groq
+duckdb
+tabulate
